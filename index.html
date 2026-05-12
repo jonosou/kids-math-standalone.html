@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Kids Math Practice</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #FFF9C4;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* Home Screen */
+    .home-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .home-title {
+      font-size: 36px;
+      font-weight: 800;
+      color: #4CAF50;
+      text-align: center;
+    }
+
+    .home-subtitle {
+      font-size: 20px;
+      color: #666;
+      text-align: center;
+    }
+
+    .topic-btn {
+      width: 100%;
+      max-width: 300px;
+      padding: 24px;
+      font-size: 28px;
+      font-weight: 700;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      min-height: 80px;
+      transition: transform 0.1s;
+    }
+
+    .topic-btn:active { transform: scale(0.95); }
+
+    .btn-addition {
+      background: #81C784;
+      color: #1B5E20;
+    }
+
+    .btn-subtraction {
+      background: #64B5F6;
+      color: #0D47A1;
+    }
+
+    .parent-link {
+      margin-top: 32px;
+      font-size: 14px;
+      color: #999;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Practice Screen */
+    .practice-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      flex: 1;
+      background: #F3E5F5;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .home-btn {
+      padding: 8px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #7B1FA2;
+      background: #fff;
+      border: 2px solid #CE93D8;
+      border-radius: 20px;
+      cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    .progress-text {
+      font-size: 18px;
+      color: #7B1FA2;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #E1BEE7;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #AB47BC;
+      border-radius: 6px;
+      transition: width 0.3s;
+    }
+
+    .question-display {
+      font-size: 48px;
+      font-weight: 800;
+      color: #4A148C;
+      margin: 24px 0;
+      text-align: center;
+    }
+
+    .user-input-display {
+      font-size: 40px;
+      font-weight: 700;
+      color: #7B1FA2;
+      min-height: 50px;
+      margin-bottom: 16px;
+      border-bottom: 3px solid #CE93D8;
+      min-width: 80px;
+      text-align: center;
+      padding: 4px 12px;
+    }
+
+    /* Number Pad */
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 16px;
+    }
+
+    .numpad-btn {
+      font-size: 28px;
+      font-weight: 700;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      min-height: 60px;
+      min-width: 60px;
+      background: #fff;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.1s;
+    }
+
+    .numpad-btn:active { transform: scale(0.9); }
+
+    .numpad-btn.delete {
+      background: #FFCDD2;
+      color: #C62828;
+      font-size: 20px;
+    }
+
+    .numpad-btn.submit {
+      background: #C8E6C9;
+      color: #2E7D32;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .numpad-btn.submit:disabled {
+      background: #eee;
+      color: #bbb;
+      cursor: not-allowed;
+    }
+
+    /* Feedback Overlay */
+    .feedback-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 0.2s;
+    }
+
+    .feedback-correct { background: rgba(76, 175, 80, 0.92); }
+    .feedback-incorrect { background: rgba(244, 67, 54, 0.92); }
+
+    .feedback-icon { font-size: 80px; margin-bottom: 16px; }
+    .feedback-text { font-size: 28px; color: #fff; font-weight: 700; text-align: center; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Summary Screen */
+    .summary-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .summary-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #4CAF50;
+    }
+
+    .summary-stats {
+      font-size: 24px;
+      color: #333;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .summary-btn {
+      padding: 16px 32px;
+      font-size: 22px;
+      font-weight: 700;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      min-height: 56px;
+      background: #81C784;
+      color: #1B5E20;
+      transition: transform 0.1s;
+    }
+
+    .summary-btn:active { transform: scale(0.95); }
+
+    /* Parent Gate */
+    .gate-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .gate-title {
+      font-size: 20px;
+      color: #666;
+      text-align: center;
+    }
+
+    .gate-question {
+      font-size: 36px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    /* Dashboard */
+    .dashboard-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      flex: 1;
+      gap: 16px;
+    }
+
+    .dashboard-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .dashboard-stat {
+      font-size: 18px;
+      color: #555;
+      text-align: center;
+    }
+
+    .session-list {
+      width: 100%;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .session-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .session-item:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // ===== State =====
+    let currentScreen = 'home';
+    let topic = 'addition';
+    let questions = [];
+    let currentIndex = 0;
+    let answers = [];
+    let userInput = '';
+    let showFeedback = false;
+    let lastResult = null;
+    let gateChallenge = null;
+    let gateInput = '';
+    let sessions = JSON.parse(localStorage.getItem('kids-math-sessions') || '[]');
+
+    // ===== Logic =====
+    function generateQuestion(topic) {
+      if (topic === 'addition') {
+        const a = Math.floor(Math.random() * 21);
+        const b = Math.floor(Math.random() * (21 - a));
+        return { operand1: a, operand2: b, operator: '+', correctAnswer: a + b };
+      } else {
+        const a = Math.floor(Math.random() * 21);
+        const b = Math.floor(Math.random() * (a + 1));
+        return { operand1: a, operand2: b, operator: '-', correctAnswer: a - b };
+      }
+    }
+
+    function generateSession(topic) {
+      return Array.from({ length: 20 }, () => generateQuestion(topic));
+    }
+
+    function generateGateChallenge() {
+      const a = Math.floor(Math.random() * 9) + 4; // 4-12
+      const b = Math.floor(Math.random() * 9) + 4; // 4-12
+      return { expression: `${a} × ${b}`, correctAnswer: a * b };
+    }
+
+    // ===== Rendering =====
+    function render() {
+      const app = document.getElementById('app');
+      switch (currentScreen) {
+        case 'home': app.innerHTML = renderHome(); break;
+        case 'practice': app.innerHTML = renderPractice(); break;
+        case 'summary': app.innerHTML = renderSummary(); break;
+        case 'gate': app.innerHTML = renderGate(); break;
+        case 'dashboard': app.innerHTML = renderDashboard(); break;
+      }
+      attachListeners();
+    }
+
+    function renderHome() {
+      return `
+        <div class="home-screen">
+          <div class="home-title">🧮 Math Practice</div>
+          <div class="home-subtitle">Choose what to practice!</div>
+          <button class="topic-btn btn-addition" data-action="start-addition">➕ Addition</button>
+          <button class="topic-btn btn-subtraction" data-action="start-subtraction">➖ Subtraction</button>
+          <div class="parent-link" data-action="open-gate">Parent Dashboard</div>
+        </div>
+      `;
+    }
+
+    function renderPractice() {
+      const q = questions[currentIndex];
+      const pct = ((currentIndex) / questions.length) * 100;
+      let feedbackHtml = '';
+      if (showFeedback && lastResult) {
+        const cls = lastResult.isCorrect ? 'feedback-correct' : 'feedback-incorrect';
+        const icon = lastResult.isCorrect ? '✅' : '❌';
+        const text = lastResult.isCorrect ? 'Great job!' : `The answer is ${lastResult.correctAnswer}`;
+        feedbackHtml = `
+          <div class="feedback-overlay ${cls}" data-action="dismiss-feedback">
+            <div class="feedback-icon">${icon}</div>
+            <div class="feedback-text">${text}</div>
+          </div>
+        `;
+      }
+      return `
+        <div class="practice-screen">
+          <div class="top-bar">
+            <button class="home-btn" data-action="go-home">← Home</button>
+          </div>
+          <div class="progress-text">Question ${currentIndex + 1} of ${questions.length}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="question-display">${q.operand1} ${q.operator} ${q.operand2} = ?</div>
+          <div class="user-input-display">${userInput || '&nbsp;'}</div>
+          <div class="numpad">
+            ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="numpad-btn" data-digit="${n}">${n}</button>`).join('')}
+            <button class="numpad-btn delete" data-action="delete">⌫</button>
+            <button class="numpad-btn" data-digit="0">0</button>
+            <button class="numpad-btn submit" data-action="submit" ${userInput === '' ? 'disabled' : ''}>OK</button>
+          </div>
+        </div>
+        ${feedbackHtml}
+      `;
+    }
+
+    function renderSummary() {
+      const correct = answers.filter(a => a.isCorrect).length;
+      const incorrect = answers.length - correct;
+      const emoji = correct >= 15 ? '🌟' : correct >= 10 ? '👍' : '💪';
+      return `
+        <div class="summary-screen">
+          <div class="summary-title">${emoji} All Done!</div>
+          <div class="summary-stats">
+            ✅ Correct: ${correct}<br>
+            ❌ Incorrect: ${incorrect}<br>
+            Score: ${correct} / ${answers.length}
+          </div>
+          <button class="summary-btn" data-action="play-again">Practice Again</button>
+          <button class="summary-btn" data-action="go-home" style="background:#64B5F6;color:#0D47A1;">Home</button>
+        </div>
+      `;
+    }
+
+    function renderGate() {
+      return `
+        <div class="gate-screen">
+          <div class="gate-title">Solve this to access the dashboard:</div>
+          <div class="gate-question">${gateChallenge.expression} = ?</div>
+          <div class="user-input-display">${gateInput || '&nbsp;'}</div>
+          <div class="numpad">
+            ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="numpad-btn" data-gate-digit="${n}">${n}</button>`).join('')}
+            <button class="numpad-btn delete" data-action="gate-delete">⌫</button>
+            <button class="numpad-btn" data-gate-digit="0">0</button>
+            <button class="numpad-btn submit" data-action="gate-submit" ${gateInput === '' ? 'disabled' : ''}>OK</button>
+          </div>
+          <button class="home-btn" data-action="go-home" style="margin-top:16px;">← Back</button>
+        </div>
+      `;
+    }
+
+    function renderDashboard() {
+      const addSessions = sessions.filter(s => s.topic === 'addition');
+      const subSessions = sessions.filter(s => s.topic === 'subtraction');
+      const addCorrect = addSessions.reduce((sum, s) => sum + s.correctCount, 0);
+      const addIncorrect = addSessions.reduce((sum, s) => sum + s.incorrectCount, 0);
+      const subCorrect = subSessions.reduce((sum, s) => sum + s.correctCount, 0);
+      const subIncorrect = subSessions.reduce((sum, s) => sum + s.incorrectCount, 0);
+
+      const historyHtml = sessions.slice().reverse().map(s => {
+        const date = new Date(s.date).toLocaleDateString();
+        return `<div class="session-item">${date} — ${s.topic} — ${s.correctCount}/${s.totalQuestions} correct</div>`;
+      }).join('') || '<div class="session-item">No sessions yet</div>';
+
+      return `
+        <div class="dashboard-screen">
+          <div class="dashboard-title">📊 Progress Dashboard</div>
+          <div class="dashboard-stat">
+            <strong>Addition:</strong> ${addCorrect} correct, ${addIncorrect} incorrect (${addSessions.length} sessions)
+          </div>
+          <div class="dashboard-stat">
+            <strong>Subtraction:</strong> ${subCorrect} correct, ${subIncorrect} incorrect (${subSessions.length} sessions)
+          </div>
+          <div class="dashboard-stat"><strong>Total sessions:</strong> ${sessions.length}</div>
+          <div class="session-list">${historyHtml}</div>
+          <button class="home-btn" data-action="go-home">← Home</button>
+        </div>
+      `;
+    }
+
+    // ===== Event Handling =====
+    function attachListeners() {
+      document.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', handleAction);
+      });
+      document.querySelectorAll('[data-digit]').forEach(el => {
+        el.addEventListener('click', () => {
+          if (userInput.length < 2) {
+            userInput += el.dataset.digit;
+            render();
+          }
+        });
+      });
+      document.querySelectorAll('[data-gate-digit]').forEach(el => {
+        el.addEventListener('click', () => {
+          if (gateInput.length < 3) {
+            gateInput += el.dataset.gateDigit;
+            render();
+          }
+        });
+      });
+    }
+
+    function handleAction(e) {
+      const action = e.currentTarget.dataset.action;
+      switch (action) {
+        case 'start-addition':
+          startSession('addition');
+          break;
+        case 'start-subtraction':
+          startSession('subtraction');
+          break;
+        case 'go-home':
+          currentScreen = 'home';
+          render();
+          break;
+        case 'delete':
+          userInput = userInput.slice(0, -1);
+          render();
+          break;
+        case 'submit':
+          submitAnswer();
+          break;
+        case 'dismiss-feedback':
+          dismissFeedback();
+          break;
+        case 'play-again':
+          startSession(topic);
+          break;
+        case 'open-gate':
+          gateChallenge = generateGateChallenge();
+          gateInput = '';
+          currentScreen = 'gate';
+          render();
+          break;
+        case 'gate-delete':
+          gateInput = gateInput.slice(0, -1);
+          render();
+          break;
+        case 'gate-submit':
+          if (parseInt(gateInput) === gateChallenge.correctAnswer) {
+            currentScreen = 'dashboard';
+          } else {
+            currentScreen = 'home';
+          }
+          render();
+          break;
+      }
+    }
+
+    function startSession(t) {
+      topic = t;
+      questions = generateSession(topic);
+      currentIndex = 0;
+      answers = [];
+      userInput = '';
+      showFeedback = false;
+      lastResult = null;
+      currentScreen = 'practice';
+      render();
+    }
+
+    function submitAnswer() {
+      if (userInput === '') return;
+      const q = questions[currentIndex];
+      const answer = parseInt(userInput);
+      const isCorrect = answer === q.correctAnswer;
+      lastResult = { userAnswer: answer, correctAnswer: q.correctAnswer, isCorrect };
+      answers.push(lastResult);
+      showFeedback = true;
+      render();
+    }
+
+    function dismissFeedback() {
+      showFeedback = false;
+      lastResult = null;
+      userInput = '';
+      currentIndex++;
+      if (currentIndex >= questions.length) {
+        saveSession();
+        currentScreen = 'summary';
+      }
+      render();
+    }
+
+    function saveSession() {
+      const correct = answers.filter(a => a.isCorrect).length;
+      const record = {
+        id: Date.now().toString(),
+        topic,
+        date: new Date().toISOString(),
+        totalQuestions: answers.length,
+        correctCount: correct,
+        incorrectCount: answers.length - correct,
+      };
+      sessions.push(record);
+      localStorage.setItem('kids-math-sessions', JSON.stringify(sessions));
+    }
+
+    // ===== Init =====
+    render();
+  </script>
+</body>
+</html>
