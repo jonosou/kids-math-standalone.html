@@ -222,6 +222,12 @@
 
     .feedback-icon { font-size: 80px; margin-bottom: 16px; }
     .feedback-text { font-size: 28px; color: #fff; font-weight: 700; text-align: center; }
+    .feedback-hint { font-size: 16px; color: rgba(255,255,255,0.8); margin-top: 24px; }
+    .feedback-timer { width: 60%; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; margin-top: 16px; overflow: hidden; }
+    .feedback-timer-fill { height: 100%; background: #fff; border-radius: 3px; }
+    .feedback-timer-fill.correct { animation: timerShrink 1.5s linear forwards; }
+    .feedback-timer-fill.incorrect { animation: timerShrink 2.5s linear forwards; }
+    @keyframes timerShrink { from { width: 100%; } to { width: 0%; } }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -402,10 +408,13 @@
         const cls = lastResult.isCorrect ? 'feedback-correct' : 'feedback-incorrect';
         const icon = lastResult.isCorrect ? '✅' : '❌';
         const text = lastResult.isCorrect ? 'Great job!' : `The answer is ${lastResult.correctAnswer}`;
+        const timerCls = lastResult.isCorrect ? 'correct' : 'incorrect';
         feedbackHtml = `
           <div class="feedback-overlay ${cls}" data-action="dismiss-feedback">
             <div class="feedback-icon">${icon}</div>
             <div class="feedback-text">${text}</div>
+            <div class="feedback-timer"><div class="feedback-timer-fill ${timerCls}"></div></div>
+            <div class="feedback-hint">Tap anywhere to continue</div>
           </div>
         `;
       }
@@ -575,6 +584,8 @@
       render();
     }
 
+    let feedbackTimer = null;
+
     function submitAnswer() {
       if (userInput === '') return;
       const q = questions[currentIndex];
@@ -584,9 +595,16 @@
       answers.push(lastResult);
       showFeedback = true;
       render();
+
+      // Auto-advance after 1.5s (correct) or 2.5s (incorrect, gives time to read answer)
+      clearTimeout(feedbackTimer);
+      feedbackTimer = setTimeout(() => {
+        if (showFeedback) dismissFeedback();
+      }, isCorrect ? 1500 : 2500);
     }
 
     function dismissFeedback() {
+      clearTimeout(feedbackTimer);
       showFeedback = false;
       lastResult = null;
       userInput = '';
